@@ -2,15 +2,34 @@
   background-color: black;
 }
 
-.square {
+#container {
   background-color: gray;
-  height: 15px;
-  width: 15px;
+  height: 207px;
+  width: 175px;
+  padding: 5px;
+}
+
+#container,
+.square {
   border: 2px solid;
-  border-right-color: black;
   border-left-color: white;
   border-top-color: white;
+  border-right-color: black;
   border-bottom-color: black;
+}
+
+.header,
+.body {
+  border: 2px solid;
+  border-left-color: black;
+  border-top-color: black;
+  border-right-color: white;
+  border-bottom-color: white;
+}
+
+.square {
+  height: 15px;
+  width: 15px;
   display: inline-block;
   margin: 0;
   padding: 0;
@@ -20,4 +39,23 @@
 .row {
   display: block;
   line-height: 0;
+}
+
+.header,
+.body {
+  margin: 0 auto;
+}
+
+.header {
+  padding: 3px;
+  width: 165px;
+  display: inline-block;
+}
+
+.poop {
+  float: left;
+}
+
+.timer {
+  float: right;
 }
