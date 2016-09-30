@@ -1,3 +1,8 @@
+@font-face{
+ font-family:'digital-clock-font';
+ src: url('digital-7.ttf');
+}
+
 #overlay {
   background-color: black;
 }
@@ -51,7 +56,18 @@
 .display {
   padding: 3px;
   width: 165px;
+  height: 19px;
   display: inline-block;
+  font-family: 'digital-clock-font';
+  font-weight: bold;
+  color: red;
+}
+
+.remainder,
+.timer {
+  height: 100%;
+  background-color: black;
+  vertical-align: text-bottom;
 }
 
 .remainder {
