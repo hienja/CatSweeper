@@ -3,14 +3,15 @@
 }
 
 #container {
-  background-color: gray;
+  background-color: brown;
   height: 207px;
   width: 175px;
   padding: 5px;
 }
 
 #container,
-.square {
+.square,
+.rise {
   border: 2px solid;
   border-left-color: white;
   border-top-color: white;
@@ -18,13 +19,19 @@
   border-bottom-color: black;
 }
 
-.header,
-.body {
+.display,
+.body,
+.sink {
   border: 2px solid;
   border-left-color: black;
   border-top-color: black;
   border-right-color: white;
   border-bottom-color: white;
+}
+
+.display,
+.body {
+  margin: 0 auto;
 }
 
 .square {
@@ -41,21 +48,21 @@
   line-height: 0;
 }
 
-.header,
-.body {
-  margin: 0 auto;
-}
-
-.header {
+.display {
   padding: 3px;
   width: 165px;
   display: inline-block;
 }
 
-.poop {
+.remainder {
   float: left;
 }
 
 .timer {
   float: right;
+}
+
+.poop { 
+  background-image: url("poop.png");
+  background-size: 15px;
 }
