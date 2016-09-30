@@ -3,7 +3,7 @@
 }
 
 #container {
-  background-color: brown;
+  background-color: #F1C40F;
   height: 207px;
   width: 175px;
   padding: 5px;
@@ -13,20 +13,20 @@
 .square,
 .rise {
   border: 2px solid;
-  border-left-color: white;
-  border-top-color: white;
-  border-right-color: black;
-  border-bottom-color: black;
+  border-left-color: #F9E79F;
+  border-top-color: #F9E79F;
+  border-right-color: #9A7D0A;
+  border-bottom-color: #9A7D0A;
 }
 
 .display,
 .body,
 .sink {
   border: 2px solid;
-  border-left-color: black;
-  border-top-color: black;
-  border-right-color: white;
-  border-bottom-color: white;
+  border-left-color: #9A7D0A;
+  border-top-color: #9A7D0A;
+  border-right-color: #F9E79F;
+  border-bottom-color: #F9E79F;
 }
 
 .display,
