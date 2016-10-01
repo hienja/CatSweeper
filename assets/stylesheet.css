@@ -9,13 +9,14 @@
 
 #container {
   background-color: #F1C40F;
-  height: 207px;
+  height: auto;
   width: 175px;
   padding: 5px;
 }
 
 #container,
 .square,
+.start,
 .rise {
   border: 2px solid;
   border-left-color: #F9E79F;
@@ -46,6 +47,10 @@
   margin: 0;
   padding: 0;
   border-collapse: separate;
+  text-align: center;
+  vertical-align: bottom;
+  line-height: 15px;
+  text-indent: -999px;
 }
 
 .row {
@@ -54,20 +59,32 @@
 }
 
 .display {
+  margin-bottom: 5px;
   padding: 3px;
   width: 165px;
-  height: 19px;
+  height: 35px;
   display: inline-block;
   font-family: 'digital-clock-font';
+  font-size: 35px;
   font-weight: bold;
   color: red;
 }
 
 .remainder,
 .timer {
-  height: 100%;
+  display: inline-block;
+  height: 75%;
+  margin: auto 0;
+  width: auto;
   background-color: black;
-  vertical-align: text-bottom;
+}
+
+.start {
+  display: inline-block;
+  position: relative;
+  left: 10%;
+  width: 30px;
+  height: 30px;
 }
 
 .remainder {
@@ -79,6 +96,11 @@
 }
 
 .poop { 
-  background-image: url("poop.png");
+  background-image: url("cat.png");
   background-size: 15px;
+  z-index: -999px;
+}
+
+.show {
+  text-indent: 0;
 }
