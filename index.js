@@ -90,8 +90,7 @@ $(document).ready(function(){
     if (event.button === 2 && currentSquare.classList.contains('square') && !currentSquare.classList.contains('sink')) {
       event.target.classList.toggle('poop');
     }
-    if (event.button === 0 && currentSquare.classList.contains('square') && !currentSquare.classList.contains('poop')) {
-
+    if (event.button === 0 && currentSquare.classList.contains('square') && !currentSquare.classList.contains('poop') && !currentSquare.classList.contains('sink')) {
       if (currentSquare.innerHTML === 'cat') {
         currentSquare.classList.add('sink', 'poop');
         var audio = {};
@@ -119,21 +118,25 @@ var check = function(x, y) {
     return true;
   } else {
     if (y - 1 > 0 && !$('.' + (y - 1) + ' :nth-child(' + x + ')')[0].classList.contains('sink')) {
+      safeCount--;
       $('.' + (y - 1) + ' :nth-child(' + x + ')').addClass('sink');
       $('.' + (y - 1) + ' :nth-child(' + x + ')').addClass('show');
       check(x, y - 1);
     }
     if (y + 1 <= columns && !$('.' + (y + 1) + ' :nth-child(' + x + ')')[0].classList.contains('sink')) {
+      safeCount--;
       $('.' + (y + 1) + ' :nth-child(' + x + ')').addClass('sink');
       $('.' + (y + 1) + ' :nth-child(' + x + ')').addClass('show');
       check(x, y + 1);
     }
     if (x - 1 > 0 && !$('.' + y + ' :nth-child(' + (x - 1) + ')')[0].classList.contains('sink')) {
+      safeCount--;
       $('.' + y + ' :nth-child(' + (x - 1) + ')').addClass('sink');
       $('.' + y + ' :nth-child(' + (x - 1) + ')').addClass('show');
       check(x - 1, y);
     }
     if (x + 1 <= rows && !$('.' + y + ' :nth-child(' + (x + 1) + ')')[0].classList.contains('sink')) {
+      safeCount--;
       $('.' + y + ' :nth-child(' + (x + 1) + ')').addClass('sink');
       $('.' + y + ' :nth-child(' + (x + 1) + ')').addClass('show');
       check(x + 1, y);
