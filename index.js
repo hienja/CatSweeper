@@ -91,8 +91,7 @@ var checkSquare = function(x, y) {
   }
 };
 
-var initializeGame = function () {
-
+var initializeGame = function (restart) {
   eachSquare(function(){
     return 0;
   }, function () {
@@ -138,7 +137,8 @@ var initializeGame = function () {
     }
   })
 
-  $('.board').mousedown(function(event){
+
+  $('.board').on('mousedown', function(event){
     var currentSquare = event.target;
     var x = Number(currentSquare.classList[1]);
     var y = Number(currentSquare.parentElement.classList[1]);
@@ -153,7 +153,7 @@ var initializeGame = function () {
         audio['meow'].src = "assets/Cat-meow-mp3.mp3";
         audio['meow'].volume = 0.1;
         audio['meow'].play();
-        $('.board').off('mousedown');
+        $('.board').off();
       } else {
         $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
         $(document).one('mouseup', function() {
@@ -163,9 +163,9 @@ var initializeGame = function () {
         checkSquare(x, y);
         safeCount--;
         if (safeCount === 0) {
+          $('.square:not(.sink)').addClass('poop');
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
           $('.board').off('mousedown');
-          alert('YOU WIN!!!!');
         }
       }
     }
@@ -193,11 +193,12 @@ $(document).ready(function(){
   $('.start').mousedown(function(event) {
     board = [];
     safeCount = rows * columns - totalCats;
+    $('.board').off();
     $('.start').css('background-image', 'url(assets/images/cat.png)').addClass('sink')
     $(document).one('mouseup', function(event) {
       $('.start').removeClass('sink');
     });
     $('.square').removeClass('show').removeClass('sink').removeClass('poop').text('');
-    initializeGame()
+    initializeGame();
   })
 });
