@@ -1,6 +1,10 @@
-@font-face{
- font-family:'digital-clock-font';
- src: url('digital-7.ttf');
+@font-face {
+  font-family:'digital-clock-font';
+  src: url('fonts/Digital Dismay.otf');
+}
+@font-face {
+  font-family: 'cat-paws';
+  src: url('fonts/catty.ttf');
 }
 
 #overlay {
@@ -26,7 +30,7 @@
 }
 
 .display,
-.body,
+.board,
 .sink {
   border: 2px solid;
   border-left-color: #9A7D0A;
@@ -36,7 +40,7 @@
 }
 
 .display,
-.body {
+.board {
   margin: 0 auto;
 }
 
@@ -49,7 +53,7 @@
   border-collapse: separate;
   text-align: center;
   vertical-align: bottom;
-  line-height: 15px;
+  line-height: 20px;
   text-indent: -999px;
 }
 
@@ -66,8 +70,11 @@
   display: inline-block;
   font-family: 'digital-clock-font';
   font-size: 35px;
-  font-weight: bold;
   color: red;
+}
+
+.board {
+  font-family: 'Baloo Bhaina', cursive;
 }
 
 .remainder,
@@ -77,14 +84,18 @@
   margin: auto 0;
   width: auto;
   background-color: black;
+  line-height: 28px;
 }
 
 .start {
+  /*background-color: white;*/
   display: inline-block;
   position: relative;
-  left: 10%;
+  left: 12%;
   width: 30px;
   height: 30px;
+  background-image: url("images/cat.png");
+  background-size: 30px;
 }
 
 .remainder {
@@ -96,7 +107,7 @@
 }
 
 .poop { 
-  background-image: url("cat.png");
+  background-image: url("images/cat.png");
   background-size: 15px;
   z-index: -999px;
 }
