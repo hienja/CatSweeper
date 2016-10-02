@@ -91,16 +91,16 @@ var checkSquare = function(x, y) {
   }
 };
 
-//Initialize game
-eachSquare(function(){
-  return 0;
-}, function () {
-  return [];
-});
-addCats(totalCats);
-eachSquare(countCats);
+var initializeGame = function () {
 
-$(document).ready(function(){
+  eachSquare(function(){
+    return 0;
+  }, function () {
+    return [];
+  });
+  addCats(totalCats);
+  eachSquare(countCats);
+  //Place numbers and cats on the board
   eachSquare(function (x, y){
     var color = 'black';
 
@@ -138,11 +138,6 @@ $(document).ready(function(){
     }
   })
 
-  //disable right click context menu
-  document.oncontextmenu = function () {
-    return false;
-  };
-
   $('.board').mousedown(function(event){
     var currentSquare = event.target;
     var x = Number(currentSquare.classList[1]);
@@ -151,18 +146,25 @@ $(document).ready(function(){
     //Logic for left mouse click
     if (event.button === 0 && currentSquare.classList.contains('square') && !currentSquare.classList.contains('poop') && !currentSquare.classList.contains('sink')) {
       if (currentSquare.innerHTML === 'cat') {
+        $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
         currentSquare.classList.add('sink', 'poop');
         var audio = {};
         audio['meow'] = new Audio();
         audio['meow'].src = "assets/Cat-meow-mp3.mp3";
         audio['meow'].volume = 0.1;
         audio['meow'].play();
+        $('.board').off('mousedown');
       } else {
-        console.log(x, y);
+        $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
+        $(document).one('mouseup', function() {
+          $('.start').css('background-image', 'url(assets/images/cat.png)');
+        });
         currentSquare.classList.add('sink', 'show');
         checkSquare(x, y);
         safeCount--;
         if (safeCount === 0) {
+          $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
+          $('.board').off('mousedown');
           alert('YOU WIN!!!!');
         }
       }
@@ -180,4 +182,22 @@ $(document).ready(function(){
       event.target.classList.toggle('poop');
     }
   }); 
+}
+
+$(document).ready(function(){
+  //Disable right click context menu
+  document.oncontextmenu = function () {
+    return false;
+  };
+  initializeGame();
+  $('.start').mousedown(function(event) {
+    board = [];
+    safeCount = rows * columns - totalCats;
+    $('.start').css('background-image', 'url(assets/images/cat.png)').addClass('sink')
+    $(document).one('mouseup', function(event) {
+      $('.start').removeClass('sink');
+    });
+    $('.square').removeClass('show').removeClass('sink').removeClass('poop').text('');
+    initializeGame()
+  })
 });
