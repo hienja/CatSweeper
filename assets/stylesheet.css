@@ -1,11 +1,22 @@
+@keyframes halfCircle {
+  from {
+    transform: rotate(180deg) translateX(80px) rotate(90deg);
+  }
+  to { 
+    transform: rotate(360deg) translateX(80px) rotate(90deg);
+  }
+}
+
 @font-face {
   font-family:'digital-clock-font';
   src: url('fonts/Digital Dismay.otf');
 }
+
 @font-face {
   font-family: 'cat-paws';
   src: url('fonts/catty.ttf');
 }
+
 
 #overlay {
   background-color: black;
@@ -109,7 +120,7 @@
 }
 
 .poop { 
-  background-image: url("images/cat.png");
+  background-image: url('images/cat.png');
   background-repeat: no-repeat;
   background-size: 15px;
   z-index: -999px;
@@ -117,4 +128,16 @@
 
 .show {
   text-indent: 0;
+}
+
+.win {
+  background-image: url('images/nyanDiet.gif');
+  background-repeat: no-repeat;
+  background-size: 30px;
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  left: 12%;
+  top: 60%;
+  animation: halfCircle 4s linear infinite;
 }

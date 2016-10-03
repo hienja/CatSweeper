@@ -4,6 +4,10 @@ var columns = 9;
 var totalCats = 10;
 var catsLocation = {};
 var safeCount = rows * columns - totalCats;
+var audio = {};
+audio['meow'] = new Audio();
+audio['meow'].src = "assets/Cat-meow-mp3.mp3";
+audio['meow'].volume = 0.1;
 
 var eachSquare = function (callback, initialize) {
   for (var i = 0; i < rows; i++) {
@@ -14,9 +18,9 @@ var eachSquare = function (callback, initialize) {
       board[i][j] = callback(i, j);
     }
   }
-}
+};
 
-var addCats = function(catsNeeded) {
+var randomizeBoard = function (catsNeeded) {
   while (catsNeeded > 0) {
     var condition  = true;
     while (condition) {
@@ -34,7 +38,7 @@ var addCats = function(catsNeeded) {
     }
     catsNeeded--;  
   }
-} 
+}; 
 
 var withinRange = function (value, length) {
   if (value >= 0 && value < length) {
@@ -42,7 +46,7 @@ var withinRange = function (value, length) {
   } else {
     return false;
   }
-}
+};
 
 var surroundingArea = function (x, y, callback, startsAtOne) {
   var count = 0;
@@ -50,19 +54,20 @@ var surroundingArea = function (x, y, callback, startsAtOne) {
 
   for (var i = -1; i <= 1; i++) {
     for (var j = -1; j <= 1; j++) {
-      if(withinRange(x + i - startsAtOne, rows) && withinRange(y + j - startsAtOne, columns)) {
+      // countCenter = (i === 0 && j === 0);
+      if (withinRange(x + i - startsAtOne, rows) && withinRange(y + j - startsAtOne, columns) && !(i === 0 && j === 0)) {
         count += callback(x + i, y + j);
       }
     }
   }
   return count;
-}
+};
 
 var countCats = function (x, y) {
   if (board[x][y] === 'cat') {
     return 'cat';
   } else {
-    return surroundingArea(x, y, function(i, j) {
+    return surroundingArea(x, y, function (i, j) {
       if (board[i][j] === 'cat') {
         return 1;
       } else {
@@ -70,20 +75,20 @@ var countCats = function (x, y) {
       }
     });
   }
-}
+};
 
 var blankAffect = function (x, y) {
-  if (x <= rows && !$('.' + y + ' :nth-child(' + x + ')')[0].classList.contains('sink')) {
+  if (x <= rows && !findElementsFromCoordinates(x, y).hasClass('sink') && !findElementsFromCoordinates(x, y).hasClass('poop')) {
     safeCount--;
-    $('.' + y + ' :nth-child(' + x + ')').addClass('sink').addClass('show');
+    findElementsFromCoordinates(x, y).addClass('sink').addClass('show');
     checkSquare(x, y);
   }
-}
+};
 
-var checkSquare = function(x, y) {
-  if ($('.' + y + ' :nth-child(' + x + ')')[0].innerHTML === 'cat') {
+var checkSquare = function (x, y) {
+  if (findElementsFromCoordinates(x, y).text() === 'cat') {
     return false;
-  } else if ($('.' + y + ' :nth-child(' + x + ')')[0].innerHTML) {
+  } else if (findElementsFromCoordinates(x, y).text()) {
     return true;
   } else {
     surroundingArea(x, y, blankAffect, true);
@@ -91,114 +96,170 @@ var checkSquare = function(x, y) {
   }
 };
 
+var findElementsFromCoordinates = function(x, y) {
+  var args = Array.from(arguments).slice(2);
+  var notHave = ':not('
+
+  for (var i = 0; i < args.length; i++) {
+    if (i === 0) {
+      notHave += args[i];
+    } else {
+      notHave += ', ' + args[i];
+    }
+  }
+  notHave += ')';
+
+  if (args.lenght === 0) {
+    return $('.' + y + ' :nth-child(' + x + ')');
+  } else {
+    return $('.' + y + ' :nth-child(' + x + ')' + notHave);
+  }
+};
+
+var placeGamePiece = function (x, y) {
+  var color = 'black';
+
+  switch (board[x][y]) {
+    case 1:
+      color = 'blue';
+      break;
+    case 2:
+      color = 'green';
+      break;
+    case 3:
+      color = 'red';
+      break;
+    case 4:
+      color = 'purple';
+      break;
+    case 5:
+      color = 'black';
+      break;
+    case 6:
+      color = 'maroon';
+      break;
+    case 7:
+      color = 'gray';
+      break;
+    case 8:
+      color = 'turquoise';
+      break;
+    default:
+      color = color;
+  }
+
+  if (board[x][y] !== 0) {
+    findElementsFromCoordinates(x + 1, y + 1).text(board[x][y]).css('color', color);
+  }
+};
+
 var initializeGame = function (restart) {
-  eachSquare(function(){
+  //Initialize matrix on board of the game
+  eachSquare(function () {
     return 0;
   }, function () {
     return [];
   });
-  addCats(totalCats);
+  randomizeBoard(totalCats);
   eachSquare(countCats);
-  //Place numbers and cats on the board
-  eachSquare(function (x, y){
-    var color = 'black';
+  eachSquare(placeGamePiece);
 
-    switch (board[x][y]) {
-      case 1:
-        color = 'blue';
-        break;
-      case 2:
-        color = 'green';
-        break;
-      case 3:
-        color = 'red';
-        break;
-      case 4:
-        color = 'purple';
-        break;
-      case 5:
-        color = 'black';
-        break;
-      case 6:
-        color = 'maroon';
-        break;
-      case 7:
-        color = 'gray';
-        break;
-      case 8:
-        color = 'turquoise';
-        break;
-      default:
-        color = color
-    }
-
-    if (board[x][y] !== 0) {
-      $('.' + (y + 1) + ' :nth-child(' + (x + 1) + ')').text(board[x][y]).css('color', color);
-    }
-  })
-
-
-  $('.board').on('mousedown', function(event){
+  $('.board').on('mousedown', function (event) {
     var currentSquare = event.target;
     var x = Number(currentSquare.classList[1]);
     var y = Number(currentSquare.parentElement.classList[1]);
 
     //Logic for left mouse click
-    if (event.button === 0 && currentSquare.classList.contains('square') && !currentSquare.classList.contains('poop') && !currentSquare.classList.contains('sink')) {
-      if (currentSquare.innerHTML === 'cat') {
-        $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
-        currentSquare.classList.add('sink', 'poop');
-        var audio = {};
-        audio['meow'] = new Audio();
-        audio['meow'].src = "assets/Cat-meow-mp3.mp3";
-        audio['meow'].volume = 0.1;
-        audio['meow'].play();
+    if (event.button === 0 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('poop') && !$(currentSquare).hasClass('sink')) {
+      if ($(currentSquare).text() === 'cat') {
+        $(currentSquare).addClass('sink').addClass('poop');
         $('.board').off();
+        $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
+        audio['meow'].play();
       } else {
-        $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
-        $(document).one('mouseup', function() {
-          $('.start').css('background-image', 'url(assets/images/cat.png)');
-        });
-        currentSquare.classList.add('sink', 'show');
-        checkSquare(x, y);
         safeCount--;
+        $(currentSquare).addClass('sink').addClass('show');
+        $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
+        checkSquare(x, y);
         if (safeCount === 0) {
           $('.square:not(.sink)').addClass('poop');
+          $('.board').off();
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
-          $('.board').off('mousedown');
+          $('#container').append('<span class="win"><span>');
+        } else {
+          $(document).one('mouseup', function () {
+            $('.start').css('background-image', 'url(assets/images/cat.png)');
+          });
         }
       }
     }
 
-    //Logic for click both left and right mouse click
-    if (event.button === 1 && currentSquare.classList.contains('square') && currentSquare.classList.contains('sink')) {
-      if (surroundingArea(x, y, countCats, true) === 0) {
-        surroundingArea(x, y, checkSquare, true);
+    //Logic when both left and right mouse button are clicked
+    if (event.button === 1 && $(currentSquare).hasClass('square')) {
+      var flags = surroundingArea(x, y, function (i, j) {
+        findElementsFromCoordinates(i, j, 'show', 'poop').addClass('sink');
+        $(document).one('mouseup', function () {
+          findElementsFromCoordinates(i, j, 'show', 'poop').removeClass('sink');
+        });
+        return $('.' + j + ' :nth-child(' + i + ').poop').length;
+      }, true);
+
+      console.log(findElementsFromCoordinates(x, y).filter('poop').length);
+      if (flags == findElementsFromCoordinates(x, y)) {
+        surroundingArea(x, y, function (i, j) {
+          if (!findElementsFromCoordinates(i, j).hasClass('poop')) {
+            if (findElementsFromCoordinates(i, j).text() === 'cat') {
+              findElementsFromCoordinates(i, j).addClass('sink').addClass('poop');
+              $('.board').off();
+              $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
+              audio['meow'].play();
+            } else {
+              safeCount--;
+              findElementsFromCoordinates(i, j).addClass('sink').addClass('show');
+              $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
+              checkSquare(x, y);
+              if (safeCount === 0) {
+                $('.square:not(.sink)').addClass('poop');
+                $('.board').off('mousedown');
+                $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
+              } else {
+                $(document).one('mouseup', function () {
+                  $('.start').css('background-image', 'url(assets/images/cat.png)');
+                });
+              }
+            }
+          }
+        }, true);
       }
     }
 
     //Logic for right mouse click
-    if (event.button === 2 && currentSquare.classList.contains('square') && !currentSquare.classList.contains('sink')) {
-      event.target.classList.toggle('poop');
+    if (event.button === 2 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('sink')) {
+      $(currentSquare).toggleClass('poop');
     }
   }); 
 }
 
-$(document).ready(function(){
+$(document).ready(function () {
   //Disable right click context menu
   document.oncontextmenu = function () {
     return false;
   };
+
   initializeGame();
-  $('.start').mousedown(function(event) {
+
+  //Restart game
+  $('.start').mousedown(function (event) {
     board = [];
     safeCount = rows * columns - totalCats;
+    $('.win').remove();
     $('.board').off();
-    $('.start').css('background-image', 'url(assets/images/cat.png)').addClass('sink')
-    $(document).one('mouseup', function(event) {
+    $('.start').css('background-image', 'url(assets/images/cat.png)').addClass('sink');
+    $(document).one('mouseup', function (event) {
       $('.start').removeClass('sink');
     });
     $('.square').removeClass('show').removeClass('sink').removeClass('poop').text('');
+    
     initializeGame();
-  })
+  });
 });
