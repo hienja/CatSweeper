@@ -38,7 +38,24 @@ var randomizeBoard = function (catsNeeded) {
     }
     catsNeeded--;  
   }
-}; 
+};
+
+var aroundEachCat = function (callback) {
+  for (var row in catsLocation) {
+    var column = catsLocation[row];
+    row = Number(row);
+
+    for (var i = 0; i < column.length; i++) {
+      surroundingArea(row, column[i], callback);
+    }
+  }
+};
+
+var catCount = function (x, y) {
+  if (board[x][y] !== 'cat') {
+    board[x][y]++;
+  }
+};
 
 var withinRange = function (value, length) {
   if (value >= 0 && value < length) {
@@ -55,7 +72,7 @@ var surroundingArea = function (x, y, callback, startsAtOne) {
   for (var i = -1; i <= 1; i++) {
     for (var j = -1; j <= 1; j++) {
       // countCenter = (i === 0 && j === 0);
-      if (withinRange(x + i - startsAtOne, rows) && withinRange(y + j - startsAtOne, columns) && !(i === 0 && j === 0)) {
+      if (withinRange(x + i - startsAtOne, rows) && withinRange(y + j - startsAtOne, columns) /*&& !(i === 0 && j === 0)*/) {
         count += callback(x + i, y + j);
       }
     }
@@ -63,22 +80,8 @@ var surroundingArea = function (x, y, callback, startsAtOne) {
   return count;
 };
 
-var countCats = function (x, y) {
-  if (board[x][y] === 'cat') {
-    return 'cat';
-  } else {
-    return surroundingArea(x, y, function (i, j) {
-      if (board[i][j] === 'cat') {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-  }
-};
-
 var blankAffect = function (x, y) {
-  if (x <= rows && !findElementsFromCoordinates(x, y).hasClass('sink') && !findElementsFromCoordinates(x, y).hasClass('poop')) {
+  if (x <= rows && !findElementsFromCoordinates(x, y).hasClass('sink') && !findElementsFromCoordinates(x, y).hasClass('mark')) {
     safeCount--;
     findElementsFromCoordinates(x, y).addClass('sink').addClass('show');
     checkSquare(x, y);
@@ -161,7 +164,7 @@ var initializeGame = function (restart) {
     return [];
   });
   randomizeBoard(totalCats);
-  eachSquare(countCats);
+  aroundEachCat(catCount);
   eachSquare(placeGamePiece);
 
   $('.board').on('mousedown', function (event) {
@@ -170,9 +173,9 @@ var initializeGame = function (restart) {
     var y = Number(currentSquare.parentElement.classList[1]);
 
     //Logic for left mouse click
-    if (event.button === 0 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('poop') && !$(currentSquare).hasClass('sink')) {
+    if (event.button === 0 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('mark') && !$(currentSquare).hasClass('sink')) {
       if ($(currentSquare).text() === 'cat') {
-        $(currentSquare).addClass('sink').addClass('poop');
+        $(currentSquare).addClass('sink').addClass('mark');
         $('.board').off();
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
         audio['meow'].play();
@@ -182,7 +185,7 @@ var initializeGame = function (restart) {
         $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
         checkSquare(x, y);
         if (safeCount === 0) {
-          $('.square:not(.sink)').addClass('poop');
+          $('.square:not(.sink)').addClass('mark');
           $('.board').off();
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
           $('#container').append('<span class="win"><span>');
@@ -194,24 +197,29 @@ var initializeGame = function (restart) {
       }
     }
 
-    //Logic when both left and right mouse button are clicked
+    //Logic when both left and right mouse buttons are clicked
     if (event.button === 1 && $(currentSquare).hasClass('square')) {
-      var flags = surroundingArea(x, y, function (i, j) {
-        findElementsFromCoordinates(i, j, 'show', 'poop').addClass('sink');
-        $(document).one('mouseup', function () {
-          findElementsFromCoordinates(i, j, 'show', 'poop').removeClass('sink');
-        });
-        return $('.' + j + ' :nth-child(' + i + ').poop').length;
+      var marks = surroundingArea(x, y, function (i, j) {
+        if (!findElementsFromCoordinates(i, j).hasClass('sink')) {
+          if (!findElementsFromCoordinates(i, j).hasClass('mark')) {
+            findElementsFromCoordinates(i, j).addClass('sink');
+            $(document).one('mouseup', function () {
+              findElementsFromCoordinates(i, j).removeClass('sink');
+            });
+          }
+          return findElementsFromCoordinates(i, j).hasClass('mark') ? 1 : 0;
+        } else {
+          return 0;
+        }
       }, true);
+      var foundCat = false;
 
-      console.log(findElementsFromCoordinates(x, y).filter('poop').length);
-      if (flags == findElementsFromCoordinates(x, y)) {
+      if (marks == findElementsFromCoordinates(x, y).text()) {
         surroundingArea(x, y, function (i, j) {
-          if (!findElementsFromCoordinates(i, j).hasClass('poop')) {
+          if (!findElementsFromCoordinates(i, j).hasClass('mark')) {
             if (findElementsFromCoordinates(i, j).text() === 'cat') {
-              findElementsFromCoordinates(i, j).addClass('sink').addClass('poop');
-              $('.board').off();
-              $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
+              foundCat = true;
+              findElementsFromCoordinates(i, j).addClass('sink').addClass('mark');
               audio['meow'].play();
             } else {
               safeCount--;
@@ -219,7 +227,7 @@ var initializeGame = function (restart) {
               $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
               checkSquare(x, y);
               if (safeCount === 0) {
-                $('.square:not(.sink)').addClass('poop');
+                $('.square:not(sink)').addClass('mark');
                 $('.board').off('mousedown');
                 $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
               } else {
@@ -231,14 +239,19 @@ var initializeGame = function (restart) {
           }
         }, true);
       }
+
+      // if (foundCat) {
+      //   $('.board').off();
+      //   $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
+      // }
     }
 
     //Logic for right mouse click
     if (event.button === 2 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('sink')) {
-      $(currentSquare).toggleClass('poop');
+      $(currentSquare).toggleClass('mark');
     }
   }); 
-}
+};
 
 $(document).ready(function () {
   //Disable right click context menu
@@ -258,8 +271,8 @@ $(document).ready(function () {
     $(document).one('mouseup', function (event) {
       $('.start').removeClass('sink');
     });
-    $('.square').removeClass('show').removeClass('sink').removeClass('poop').text('');
-    
+    $('.square').removeClass('show').removeClass('sink').removeClass('mark').text('');
+
     initializeGame();
   });
 });
