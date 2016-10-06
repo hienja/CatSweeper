@@ -46,7 +46,7 @@ var aroundEachCat = function (callback) {
     row = Number(row);
 
     for (var i = 0; i < column.length; i++) {
-      surroundingArea(row, column[i], callback);
+      surroundingArea(Number(row), column[i], callback);
     }
   }
 };
@@ -264,6 +264,7 @@ $(document).ready(function () {
   //Restart game
   $('.start').mousedown(function (event) {
     board = [];
+    catsLocation = {};
     safeCount = rows * columns - totalCats;
     $('.win').remove();
     $('.board').off();
