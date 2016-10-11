@@ -5,22 +5,32 @@ var totalCats = 10;
 var catsLocation = {};
 var safeCount = rows * columns - totalCats;
 var audio = {};
-audio['meow'] = new Audio();
-audio['meow'].src = "assets/Cat-meow-mp3.mp3";
-audio['meow'].volume = 0.1;
+audio['meow1'] = new Audio();
+audio['meow1'].src = "assets/audio/Cat-meow-mp3.mp3";
+audio['meow1'].volume = 0.1;
 
-var eachSquare = function (callback, initialize) {
+audio['meow2'] = new Audio();
+audio['meow2'].src = "assets/audio/Cat-meow-6.mp3";
+audio['meow2'].volume = 1.0;
+
+audio['meow3'] = new Audio();
+audio['meow3'].src = "assets/audio/Cat-meow-8.mp3";
+audio['meow3'].volume = 1.0;
+
+var eachSquare = function (board, callback, initialize) {
   for (var i = 0; i < rows; i++) {
     if (initialize) {
       board[i] = initialize(i);
     }
     for (var j = 0; j < columns; j++) {
-      board[i][j] = callback(i, j);
+      board[i][j] = callback(board, i, j);
     }
   }
+
+  return board;
 };
 
-var randomizeBoard = function (catsNeeded) {
+var randomizeBoard = function (board, catsNeeded) {
   while (catsNeeded > 0) {
     var condition  = true;
     while (condition) {
@@ -38,20 +48,24 @@ var randomizeBoard = function (catsNeeded) {
     }
     catsNeeded--;  
   }
+
+  return board;
 };
 
-var aroundEachCat = function (callback) {
+var aroundEachCat = function (board, catsLocation, callback) {
   for (var row in catsLocation) {
     var column = catsLocation[row];
     row = Number(row);
 
     for (var i = 0; i < column.length; i++) {
-      surroundingArea(Number(row), column[i], callback);
+      surroundingArea(board, Number(row), column[i], callback);
     }
   }
+
+  return board;
 };
 
-var catCount = function (x, y) {
+var catCount = function (board, x, y) {
   if (board[x][y] !== 'cat') {
     board[x][y]++;
   }
@@ -65,7 +79,7 @@ var withinRange = function (value, length) {
   }
 };
 
-var surroundingArea = function (x, y, callback, startsAtOne) {
+var surroundingArea = function (board, x, y, callback, startsAtOne) {
   var count = 0;
   startsAtOne = startsAtOne ? 1 : 0;
 
@@ -73,28 +87,29 @@ var surroundingArea = function (x, y, callback, startsAtOne) {
     for (var j = -1; j <= 1; j++) {
       // countCenter = (i === 0 && j === 0);
       if (withinRange(x + i - startsAtOne, rows) && withinRange(y + j - startsAtOne, columns) /*&& !(i === 0 && j === 0)*/) {
-        count += callback(x + i, y + j);
+        count += callback(board, x + i, y + j);
       }
     }
   }
+
   return count;
 };
 
-var blankAffect = function (x, y) {
+var blankAffect = function (board, x, y) {
   if (x <= rows && !findElementsFromCoordinates(x, y).hasClass('sink') && !findElementsFromCoordinates(x, y).hasClass('mark')) {
     safeCount--;
     findElementsFromCoordinates(x, y).addClass('sink').addClass('show');
-    checkSquare(x, y);
+    checkSquare(board, x, y);
   }
 };
 
-var checkSquare = function (x, y) {
+var checkSquare = function (board, x, y) {
   if (findElementsFromCoordinates(x, y).text() === 'cat') {
     return false;
   } else if (findElementsFromCoordinates(x, y).text()) {
     return true;
   } else {
-    surroundingArea(x, y, blankAffect, true);
+    surroundingArea(board, x, y, blankAffect, true);
     return 1;
   }
 };
@@ -119,7 +134,7 @@ var findElementsFromCoordinates = function(x, y) {
   }
 };
 
-var placeGamePiece = function (x, y) {
+var placeGamePiece = function (board, x, y) {
   var color = 'black';
 
   switch (board[x][y]) {
@@ -154,18 +169,26 @@ var placeGamePiece = function (x, y) {
   if (board[x][y] !== 0) {
     findElementsFromCoordinates(x + 1, y + 1).text(board[x][y]).css('color', color);
   }
+
+  return board;
 };
 
-var initializeGame = function (restart) {
+var randomMeow = function () {
+  var number = Math.floor(Math.random() * 3) + 1;
+  var meow = 'meow' + number;
+  audio[meow].play();
+}
+
+var initializeGame = function (board, catsLocation) {
   //Initialize matrix on board of the game
-  eachSquare(function () {
+  board = eachSquare(board, function () {
     return 0;
   }, function () {
     return [];
   });
-  randomizeBoard(totalCats);
-  aroundEachCat(catCount);
-  eachSquare(placeGamePiece);
+  board = randomizeBoard(board, totalCats);
+  board = aroundEachCat(board, catsLocation, catCount);
+  board = eachSquare(board, placeGamePiece);
 
   $('.board').on('mousedown', function (event) {
     var currentSquare = event.target;
@@ -178,12 +201,12 @@ var initializeGame = function (restart) {
         $(currentSquare).addClass('sink').addClass('mark');
         $('.board').off();
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
-        audio['meow'].play();
       } else {
         safeCount--;
+        randomMeow();
         $(currentSquare).addClass('sink').addClass('show');
         $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
-        checkSquare(x, y);
+        checkSquare(board, x, y);
         if (safeCount === 0) {
           $('.square:not(.sink)').addClass('mark');
           $('.board').off();
@@ -220,7 +243,7 @@ var initializeGame = function (restart) {
             if (findElementsFromCoordinates(i, j).text() === 'cat') {
               foundCat = true;
               findElementsFromCoordinates(i, j).addClass('sink').addClass('mark');
-              audio['meow'].play();
+              randomMeow();
             } else {
               safeCount--;
               findElementsFromCoordinates(i, j).addClass('sink').addClass('show');
@@ -259,7 +282,7 @@ $(document).ready(function () {
     return false;
   };
 
-  initializeGame();
+  initializeGame(board, catsLocation);
 
   //Restart game
   $('.start').mousedown(function (event) {
@@ -274,6 +297,6 @@ $(document).ready(function () {
     });
     $('.square').removeClass('show').removeClass('sink').removeClass('mark').text('');
 
-    initializeGame();
+    initializeGame(board, catsLocation);
   });
 });
