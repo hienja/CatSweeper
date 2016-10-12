@@ -7,7 +7,7 @@ var safeCount = rows * columns - totalCats;
 var audio = {};
 audio['meow1'] = new Audio();
 audio['meow1'].src = "assets/audio/Cat-meow-mp3.mp3";
-audio['meow1'].volume = 0.1;
+audio['meow1'].volume = 0.2;
 
 audio['meow2'] = new Audio();
 audio['meow2'].src = "assets/audio/Cat-meow-6.mp3";
@@ -96,6 +96,7 @@ var surroundingArea = function (board, x, y, callback, startsAtOne) {
 };
 
 var blankAffect = function (board, x, y) {
+  console.log(!findElementsFromCoordinates(x, y).hasClass('sink'), !findElementsFromCoordinates(x, y).hasClass('mark'))
   if (x <= rows && !findElementsFromCoordinates(x, y).hasClass('sink') && !findElementsFromCoordinates(x, y).hasClass('mark')) {
     safeCount--;
     findElementsFromCoordinates(x, y).addClass('sink').addClass('show');
@@ -104,18 +105,19 @@ var blankAffect = function (board, x, y) {
 };
 
 var checkSquare = function (board, x, y) {
-  if (findElementsFromCoordinates(x, y).text() === 'cat') {
+  if (board[x - 1][y - 1] === 'cat') {
     return false;
-  } else if (findElementsFromCoordinates(x, y).text()) {
+  } else if (board[x - 1][y - 1]) {
     return true;
   } else {
+    //It's blowing up here <================================================
     surroundingArea(board, x, y, blankAffect, true);
     return 1;
   }
 };
 
-var findElementsFromCoordinates = function(x, y) {
-  var args = Array.from(arguments).slice(2);
+var findElementsFromCoordinates = function(board, x, y) {
+  var args = Array.from(arguments).slice(3);
   var notHave = ':not('
 
   for (var i = 0; i < args.length; i++) {
@@ -127,7 +129,7 @@ var findElementsFromCoordinates = function(x, y) {
   }
   notHave += ')';
 
-  if (args.lenght === 0) {
+  if (args.length === 0) {
     return $('.' + y + ' :nth-child(' + x + ')');
   } else {
     return $('.' + y + ' :nth-child(' + x + ')' + notHave);
@@ -170,7 +172,7 @@ var placeGamePiece = function (board, x, y) {
     findElementsFromCoordinates(x + 1, y + 1).text(board[x][y]).css('color', color);
   }
 
-  return board;
+  return board[x][y];
 };
 
 var randomMeow = function () {
@@ -222,7 +224,7 @@ var initializeGame = function (board, catsLocation) {
 
     //Logic when both left and right mouse buttons are clicked
     if (event.button === 1 && $(currentSquare).hasClass('square')) {
-      var marks = surroundingArea(x, y, function (i, j) {
+      var marks = surroundingArea(board, x, y, function (i, j) {
         if (!findElementsFromCoordinates(i, j).hasClass('sink')) {
           if (!findElementsFromCoordinates(i, j).hasClass('mark')) {
             findElementsFromCoordinates(i, j).addClass('sink');
@@ -237,8 +239,10 @@ var initializeGame = function (board, catsLocation) {
       }, true);
       var foundCat = false;
 
+      console.log(marks);
+
       if (marks == findElementsFromCoordinates(x, y).text()) {
-        surroundingArea(x, y, function (i, j) {
+        surroundingArea(board, x, y, function (i, j) {
           if (!findElementsFromCoordinates(i, j).hasClass('mark')) {
             if (findElementsFromCoordinates(i, j).text() === 'cat') {
               foundCat = true;
@@ -248,7 +252,7 @@ var initializeGame = function (board, catsLocation) {
               safeCount--;
               findElementsFromCoordinates(i, j).addClass('sink').addClass('show');
               $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
-              checkSquare(x, y);
+              checkSquare(board, x, y);
               if (safeCount === 0) {
                 $('.square:not(sink)').addClass('mark');
                 $('.board').off('mousedown');
