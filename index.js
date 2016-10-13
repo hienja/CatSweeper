@@ -4,6 +4,9 @@ var columns = 9;
 var totalCats = 10;
 var catsLocation = {};
 var safeCount = rows * columns - totalCats;
+var timer = true;
+var time;
+var count = 0;
 var audio = {};
 audio['meow1'] = new Audio();
 audio['meow1'].src = "assets/audio/Cat-meow-mp3.mp3";
@@ -198,7 +201,23 @@ var initializeGame = function (board, catsLocation) {
 
     //Logic for left mouse click
     if (event.button === 0 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('mark') && !$(currentSquare).hasClass('sink')) {
+      if (timer) {
+        timer = false;
+        time = setInterval(function() {
+          count++
+          if (count < 10) {
+            var stringCount = '00' + count;
+          } else if (count < 100){
+            var stringCount = '0' + count
+          } else {
+            var stringCount = count;
+          }
+          $('.timer').text(stringCount);          
+        }, 1000);
+      }
+      //When you lose
       if (currentValue === 'cat') {
+        clearInterval(time);
         $(currentSquare).addClass('sink').addClass('mark');
         $('.board').off();
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
@@ -209,7 +228,9 @@ var initializeGame = function (board, catsLocation) {
         $(currentSquare).addClass('sink').addClass('show');
         $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
         checkSquare(board, x, y);
+        //When you win
         if (safeCount === 0) {
+          clearInterval(time);
           $('.square:not(.sink)').addClass('mark');
           $('.board').off();
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
@@ -252,7 +273,9 @@ var initializeGame = function (board, catsLocation) {
               findElementsFromCoordinates(board, i, j).addClass('sink').addClass('show');
               $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
               checkSquare(board, i, j);
+              //When you win
               if (safeCount === 0) {
+                clearInterval(time);
                 $('.square:not(.sink)').addClass('mark');
                 $('.board').off();
                 $(document).off('mouseup');
@@ -267,8 +290,9 @@ var initializeGame = function (board, catsLocation) {
           }
         }, true);
       }
-
+      //When you lose
       if (foundCat) {
+        clearInterval(time);
         $('.board').off();
         $(document).off('mouseup');
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
@@ -304,6 +328,10 @@ $(document).ready(function () {
     board = [];
     catsLocation = {};
     safeCount = rows * columns - totalCats;
+    timer = true;
+    count = 0;
+    clearInterval(time);
+    $('.timer').text('000');
     $('.remainder').text('0' + totalCats);
     $('.win').remove();
     $('.board').off();
