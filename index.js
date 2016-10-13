@@ -101,7 +101,7 @@ var surroundingArea = function (board, x, y, callback, startsAtOne) {
 var blankAffect = function (board, x, y) {
   if (x <= rows && !findElementsFromCoordinates(board, x, y).hasClass('sink') && !findElementsFromCoordinates(board, x, y).hasClass('mark')) {
     safeCount--;
-    findElementsFromCoordinates(board, x, y).addClass('sink').addClass('show');
+    findElementsFromCoordinates(board, x, y).addClass('sink show');
     checkSquare(board, x, y);
   }
 };
@@ -218,19 +218,19 @@ var initializeGame = function (board, catsLocation) {
       //When you lose
       if (currentValue === 'cat') {
         clearInterval(time);
-        $(currentSquare).addClass('sink').addClass('mark');
+        $(currentSquare).addClass('sink lose');
         $('.board').off();
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
-        alert('You Lose!');
       } else {
         safeCount--;
         randomMeow();
-        $(currentSquare).addClass('sink').addClass('show');
+        $(currentSquare).addClass('sink show');
         $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
         checkSquare(board, x, y);
         //When you win
         if (safeCount === 0) {
           clearInterval(time);
+          $('.remainder').text('000');
           $('.square:not(.sink)').addClass('mark');
           $('.board').off();
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
@@ -265,17 +265,18 @@ var initializeGame = function (board, catsLocation) {
           if (!findElementsFromCoordinates(board, i, j).hasClass('mark')) {
             if (value === 'cat') {
               foundCat = true;
-              findElementsFromCoordinates(board, i, j).addClass('sink').addClass('mark');
+              findElementsFromCoordinates(board, i, j).addClass('sink mark');
             } else {
               if (!findElementsFromCoordinates(board, i, j).hasClass('show')) {
                 safeCount--;
               }
-              findElementsFromCoordinates(board, i, j).addClass('sink').addClass('show');
+              findElementsFromCoordinates(board, i, j).addClass('sink show');
               $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
               checkSquare(board, i, j);
               //When you win
               if (safeCount === 0) {
                 clearInterval(time);
+                $('.remainder').text('000');
                 $('.square:not(.sink)').addClass('mark');
                 $('.board').off();
                 $(document).off('mouseup');
@@ -292,11 +293,18 @@ var initializeGame = function (board, catsLocation) {
       }
       //When you lose
       if (foundCat) {
+        surroundingArea(board, x, y, function (board, i, j){
+          var value = findElementsFromCoordinates(board, i, j).text();
+          if (findElementsFromCoordinates(board, i, j).hasClass('mark')) {
+            if (value !== 'cat') {
+              findElementsFromCoordinates(board, i, j).removeClass('mark').addClass('wrong');
+            } 
+          }
+        }, true);
         clearInterval(time);
         $('.board').off();
         $(document).off('mouseup');
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
-        alert('You Lose!');
       }
     }
 
@@ -339,7 +347,7 @@ $(document).ready(function () {
     $(document).one('mouseup', function (event) {
       $('.start').removeClass('sink');
     });
-    $('.square').removeClass('show').removeClass('sink').removeClass('mark').text('');
+    $('.square').removeClass('show sink mark wrong lose').text('');
 
     initializeGame(board, catsLocation);
   });

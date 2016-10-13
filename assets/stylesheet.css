@@ -119,6 +119,10 @@
   float: right;
 }
 
+.show {
+  text-indent: 0;
+}
+
 .mark { 
   background-image: url('images/cat.png');
   background-repeat: no-repeat;
@@ -126,8 +130,18 @@
   z-index: -999px;
 }
 
-.show {
-  text-indent: 0;
+.lose { 
+  background-image: url('images/redCat.png');
+  background-repeat: no-repeat;
+  background-size: 15px;
+  z-index: -999px;
+}
+
+.wrong {
+  background-image: url('images/wrongCat.png');
+  background-repeat: no-repeat;
+  background-size: 15px;
+  z-index: -999px;
 }
 
 .win {
