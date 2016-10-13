@@ -192,15 +192,15 @@ var initializeGame = function (board, catsLocation) {
 
   $('.board').on('mousedown', function (event) {
     var currentSquare = event.target;
+    var currentValue = currentSquare.innerHTML;
     var x = Number(currentSquare.classList[1]);
     var y = Number(currentSquare.parentElement.classList[1]);
 
     //Logic for left mouse click
     if (event.button === 0 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('mark') && !$(currentSquare).hasClass('sink')) {
-      if ($(currentSquare).text() === 'cat') {
+      if (currentValue === 'cat') {
         $(currentSquare).addClass('sink').addClass('mark');
         $('.board').off();
-        $('.start').off('mouseup');
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
         alert('You Lose!');
       } else {
@@ -212,7 +212,6 @@ var initializeGame = function (board, catsLocation) {
         if (safeCount === 0) {
           $('.square:not(.sink)').addClass('mark');
           $('.board').off();
-          $('.start').off('mouseup');
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
           $('#container').append('<span class="win"><span>');
         } else {
@@ -238,10 +237,12 @@ var initializeGame = function (board, catsLocation) {
         return findElementsFromCoordinates(board, i, j).hasClass('mark') ? 1 : 0;
       }, true);
 
-      if (marks == findElementsFromCoordinates(board, x, y).text()) {
+      if (marks == currentValue && currentValue != 0) {
+        randomMeow();
         surroundingArea(board, x, y, function (board, i, j) {
+          var value = findElementsFromCoordinates(board, i, j).text();
           if (!findElementsFromCoordinates(board, i, j).hasClass('mark')) {
-            if (findElementsFromCoordinates(board, i, j).text() === 'cat') {
+            if (value === 'cat') {
               foundCat = true;
               findElementsFromCoordinates(board, i, j).addClass('sink').addClass('mark');
             } else {
@@ -254,7 +255,7 @@ var initializeGame = function (board, catsLocation) {
               if (safeCount === 0) {
                 $('.square:not(.sink)').addClass('mark');
                 $('.board').off();
-                $('.start').off('mouseup');
+                $(document).off('mouseup');
                 $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
                 $('#container').append('<span class="win"><span>');
               } else {
@@ -269,7 +270,7 @@ var initializeGame = function (board, catsLocation) {
 
       if (foundCat) {
         $('.board').off();
-        $('.start').off('mouseup');
+        $(document).off('mouseup');
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
         alert('You Lose!');
       }
