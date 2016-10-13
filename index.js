@@ -96,10 +96,9 @@ var surroundingArea = function (board, x, y, callback, startsAtOne) {
 };
 
 var blankAffect = function (board, x, y) {
-  console.log(!findElementsFromCoordinates(x, y).hasClass('sink'), !findElementsFromCoordinates(x, y).hasClass('mark'))
-  if (x <= rows && !findElementsFromCoordinates(x, y).hasClass('sink') && !findElementsFromCoordinates(x, y).hasClass('mark')) {
+  if (x <= rows && !findElementsFromCoordinates(board, x, y).hasClass('sink') && !findElementsFromCoordinates(board, x, y).hasClass('mark')) {
     safeCount--;
-    findElementsFromCoordinates(x, y).addClass('sink').addClass('show');
+    findElementsFromCoordinates(board, x, y).addClass('sink').addClass('show');
     checkSquare(board, x, y);
   }
 };
@@ -110,7 +109,6 @@ var checkSquare = function (board, x, y) {
   } else if (board[x - 1][y - 1]) {
     return true;
   } else {
-    //It's blowing up here <================================================
     surroundingArea(board, x, y, blankAffect, true);
     return 1;
   }
@@ -122,9 +120,9 @@ var findElementsFromCoordinates = function(board, x, y) {
 
   for (var i = 0; i < args.length; i++) {
     if (i === 0) {
-      notHave += args[i];
+      notHave += '.' + args[i];
     } else {
-      notHave += ', ' + args[i];
+      notHave += ', ' + '.' + args[i];
     }
   }
   notHave += ')';
@@ -169,7 +167,7 @@ var placeGamePiece = function (board, x, y) {
   }
 
   if (board[x][y] !== 0) {
-    findElementsFromCoordinates(x + 1, y + 1).text(board[x][y]).css('color', color);
+    findElementsFromCoordinates(board, x + 1, y + 1).text(board[x][y]).css('color', color);
   }
 
   return board[x][y];
@@ -202,7 +200,9 @@ var initializeGame = function (board, catsLocation) {
       if ($(currentSquare).text() === 'cat') {
         $(currentSquare).addClass('sink').addClass('mark');
         $('.board').off();
+        $('.start').off();
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
+        alert('You Lose!');
       } else {
         safeCount--;
         randomMeow();
@@ -212,6 +212,7 @@ var initializeGame = function (board, catsLocation) {
         if (safeCount === 0) {
           $('.square:not(.sink)').addClass('mark');
           $('.board').off();
+          $('.start').off();
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
           $('#container').append('<span class="win"><span>');
         } else {
@@ -224,39 +225,39 @@ var initializeGame = function (board, catsLocation) {
 
     //Logic when both left and right mouse buttons are clicked
     if (event.button === 1 && $(currentSquare).hasClass('square')) {
-      var marks = surroundingArea(board, x, y, function (i, j) {
-        if (!findElementsFromCoordinates(i, j).hasClass('sink')) {
-          if (!findElementsFromCoordinates(i, j).hasClass('mark')) {
-            findElementsFromCoordinates(i, j).addClass('sink');
-            $(document).one('mouseup', function () {
-              findElementsFromCoordinates(i, j).removeClass('sink');
-            });
-          }
-          return findElementsFromCoordinates(i, j).hasClass('mark') ? 1 : 0;
-        } else {
-          return 0;
-        }
-      }, true);
       var foundCat = false;
+      var marks = surroundingArea(board, x, y, function (board, i, j) {
+        if (!findElementsFromCoordinates(board, i, j).hasClass('mark')) {
+          findElementsFromCoordinates(board, i, j).addClass('sink');
+          $(document).one('mouseup', function () {
+            if(!findElementsFromCoordinates(board, i, j).hasClass('show')) {
+              findElementsFromCoordinates(board, i, j).removeClass('sink');
+            }
+          });
+        }
+        return findElementsFromCoordinates(board, i, j).hasClass('mark') ? 1 : 0;
+      }, true);
 
-      console.log(marks);
-
-      if (marks == findElementsFromCoordinates(x, y).text()) {
-        surroundingArea(board, x, y, function (i, j) {
-          if (!findElementsFromCoordinates(i, j).hasClass('mark')) {
-            if (findElementsFromCoordinates(i, j).text() === 'cat') {
+      if (marks == findElementsFromCoordinates(board, x, y).text()) {
+        surroundingArea(board, x, y, function (board, i, j) {
+          if (!findElementsFromCoordinates(board, i, j).hasClass('mark')) {
+            if (findElementsFromCoordinates(board, i, j).text() === 'cat') {
               foundCat = true;
-              findElementsFromCoordinates(i, j).addClass('sink').addClass('mark');
-              randomMeow();
+              findElementsFromCoordinates(board, i, j).addClass('sink').addClass('mark');
+              alert('You Lose!');
             } else {
-              safeCount--;
-              findElementsFromCoordinates(i, j).addClass('sink').addClass('show');
+              if (!findElementsFromCoordinates(board, i, j).hasClass('show')) {
+                safeCount--;
+              }
+              findElementsFromCoordinates(board, i, j).addClass('sink').addClass('show');
               $('.start').css('background-image', 'url(assets/images/eyesCat.gif)');
-              checkSquare(board, x, y);
+              checkSquare(board, i, j);
               if (safeCount === 0) {
-                $('.square:not(sink)').addClass('mark');
-                $('.board').off('mousedown');
+                $('.square:not(.sink)').addClass('mark');
+                $('.board').off();
+                $('.start').off();
                 $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
+                $('#container').append('<span class="win"><span>');
               } else {
                 $(document).one('mouseup', function () {
                   $('.start').css('background-image', 'url(assets/images/cat.png)');
@@ -267,10 +268,12 @@ var initializeGame = function (board, catsLocation) {
         }, true);
       }
 
-      // if (foundCat) {
-      //   $('.board').off();
-      //   $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
-      // }
+      if (foundCat) {
+        $('.board').off();
+        $('.start').off();
+        $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
+        alert('You Lose!');
+      }
     }
 
     //Logic for right mouse click
