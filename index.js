@@ -200,7 +200,7 @@ var initializeGame = function (board, catsLocation) {
       if ($(currentSquare).text() === 'cat') {
         $(currentSquare).addClass('sink').addClass('mark');
         $('.board').off();
-        $('.start').off();
+        $('.start').off('mouseup');
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
         alert('You Lose!');
       } else {
@@ -212,7 +212,7 @@ var initializeGame = function (board, catsLocation) {
         if (safeCount === 0) {
           $('.square:not(.sink)').addClass('mark');
           $('.board').off();
-          $('.start').off();
+          $('.start').off('mouseup');
           $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
           $('#container').append('<span class="win"><span>');
         } else {
@@ -244,7 +244,6 @@ var initializeGame = function (board, catsLocation) {
             if (findElementsFromCoordinates(board, i, j).text() === 'cat') {
               foundCat = true;
               findElementsFromCoordinates(board, i, j).addClass('sink').addClass('mark');
-              alert('You Lose!');
             } else {
               if (!findElementsFromCoordinates(board, i, j).hasClass('show')) {
                 safeCount--;
@@ -255,7 +254,7 @@ var initializeGame = function (board, catsLocation) {
               if (safeCount === 0) {
                 $('.square:not(.sink)').addClass('mark');
                 $('.board').off();
-                $('.start').off();
+                $('.start').off('mouseup');
                 $('.start').css('background-image', 'url(assets/images/glassesCat.gif)');
                 $('#container').append('<span class="win"><span>');
               } else {
@@ -270,7 +269,7 @@ var initializeGame = function (board, catsLocation) {
 
       if (foundCat) {
         $('.board').off();
-        $('.start').off();
+        $('.start').off('mouseup');
         $('.start').css('background-image', 'url(assets/images/fugCat.gif)');
         alert('You Lose!');
       }
@@ -278,7 +277,15 @@ var initializeGame = function (board, catsLocation) {
 
     //Logic for right mouse click
     if (event.button === 2 && $(currentSquare).hasClass('square') && !$(currentSquare).hasClass('sink')) {
+      var marksLeft = 10;
       $(currentSquare).toggleClass('mark');
+      marksLeft = marksLeft - $('.mark').length;
+      if ($('.mark').length === 0) {
+        marksLeft = '010';
+      } else if (marksLeft >= 0) {
+        marksLeft = '00'  + marksLeft;
+      }
+      $('.remainder').text(marksLeft);
     }
   }); 
 };
@@ -296,6 +303,7 @@ $(document).ready(function () {
     board = [];
     catsLocation = {};
     safeCount = rows * columns - totalCats;
+    $('.remainder').text('0' + totalCats);
     $('.win').remove();
     $('.board').off();
     $('.start').css('background-image', 'url(assets/images/cat.png)').addClass('sink');
